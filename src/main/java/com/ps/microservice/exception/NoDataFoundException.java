@@ -20,6 +20,6 @@ public class NoDataFoundException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "Innvalid Search Criteria specified: " + errorMessage;
+        return "Team with given Search Params not found";
     }
 }

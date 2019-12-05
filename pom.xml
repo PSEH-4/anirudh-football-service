@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.ps.microservice</groupId>
-	<artifactId>football-standing-ms</artifactId>
+	<artifactId>football-standing-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>football-standing-ms</name>
+	<name>football-standing-service</name>
 	<description>Football Standing micro service for Sapient Football league</description>
 
 	<parent>

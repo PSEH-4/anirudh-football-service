@@ -47,7 +47,22 @@ public class TeamStandingService {
 	
 	public StandingResponse getTeamStanding(StandingRequest request){
 		
-		return null;
+		// Fetch country Info
+		Country country = getCountryByName(request.getCountryName());
+		
+		// Fetch League Info
+		League league = getLeagueByName(country.getCountryId(), request.getLeagueName());
+		
+		Map<String, String> standingsDetails = getTeamStandingsByTeamName(league.getLeagueId(), request.getTeamName());
+		
+		StandingResponse response = new StandingResponse();
+		response.setOverallPosition(Integer.parseInt(standingsDetails.get("overall_league_position")));
+		response.setCountryInfo(country.toString());
+		response.setLeagueInfo(league.toString());
+		String teamInfo = new StringBuffer(standingsDetails.get("team_id")).append(" - ").append(standingsDetails.get("team_name")).toString();
+		response.setTeamInfo(teamInfo);
+		
+		return response;
 	}
 	
 	protected Map<String, String> imageServiceNotAvailable(){
@@ -57,7 +72,7 @@ public class TeamStandingService {
 		return i;
 	}
 	
-	public Country getCountry(StandingRequest request) {
+	public Country getCountryByName(String countryName) {
 		String requestUrl = apiUrl + "?action={apiAction}&APIkey={apiKey}";
 		Map<String, String> uriVariables = new HashMap<>();
 		uriVariables.put("apiAction", "get_countries");
@@ -65,7 +80,7 @@ public class TeamStandingService {
 		
 	    List<Country> countryList = restTemplate.exchange(requestUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<Country>>() {}, uriVariables).getBody();
 	    List<Country> matchedCountry = countryList.stream()
-	    .filter(country -> country.getCountryName().equals(request.getCountryName()))
+	    .filter(country -> country.getCountryName().equals(countryName))
 	    .collect(Collectors.toList());
 	    
 	    if (matchedCountry.isEmpty() ) {
@@ -80,17 +95,41 @@ public class TeamStandingService {
 	    
 	}
 	
-	public League getLeague(String countryId, StandingRequest request) {
+	public League getLeagueByName(String countryId, String leagueName) {
 		String requestUrl = apiUrl + "?action={apiAction}&APIkey={apiKey}&country_id={countryId}";
 		Map<String, String> uriVariables = new HashMap<>();
 		uriVariables.put("apiAction", "get_leagues");
 		uriVariables.put("apiKey", apiKey);
-		uriVariables.put("country_id=", apiKey);
+		uriVariables.put("countryId", countryId);
 		
 	    List<League> leagueList = restTemplate.exchange(requestUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<League>>() {}, uriVariables).getBody();
 	    List<League> matchedLeague = leagueList.stream()
-	    .filter(league -> league.getLeagueName().equals(request.getLeagueName()))
+	    .filter(league -> league.getLeagueName().equals(leagueName))
 	    .collect(Collectors.toList());
+	    
+	    if (matchedLeague.isEmpty() ) {
+	    	throw NoDataFoundException.createWith("Given League name not found");
+	    }
+	    
+	    if (matchedLeague.size() > 1 ) {
+	    	throw new RuntimeException("Inconsistent Data");
+	    }
+	    
+	    return matchedLeague.get(0);
+	    
+	}
+	
+	public Map<String, String> getTeamStandingsByTeamName(String leagueId, String teamName) {
+		String requestUrl = apiUrl + "?action={apiAction}&APIkey={apiKey}&league_id={leagueId}";
+		Map<String, String> uriVariables = new HashMap<>();
+		uriVariables.put("apiAction", "get_standings");
+		uriVariables.put("apiKey", apiKey);
+		uriVariables.put("leagueId", leagueId);
+		
+	    List<Map<String, String>> standingsList = restTemplate.exchange(requestUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<Map<String, String>>>() {}, uriVariables).getBody();
+	    List<Map<String, String>> matchedLeague = standingsList.stream()
+	    		.filter(map -> map.get("team_name").equals(teamName) )
+	    		.collect(Collectors.toList());
 	    
 	    if (matchedLeague.isEmpty() ) {
 	    	throw NoDataFoundException.createWith("Given League name not found");

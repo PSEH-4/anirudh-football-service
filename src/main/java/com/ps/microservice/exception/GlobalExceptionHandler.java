@@ -37,15 +37,15 @@ public class GlobalExceptionHandler {
         LOGGER.error("Handling " + ex.getClass().getSimpleName() + " due to " + ex.getMessage());
 
         if (ex instanceof InvalidRequestException) {
-            HttpStatus status = HttpStatus.NOT_FOUND;
+            HttpStatus status = HttpStatus.BAD_REQUEST;
             InvalidRequestException unfe = (InvalidRequestException) ex;
 
-            return handleUserNotFoundException(unfe, headers, status, request);
+            return handleInvalidRequestException(unfe, headers, status, request);
         } else if (ex instanceof NoDataFoundException) {
-            HttpStatus status = HttpStatus.BAD_REQUEST;
+            HttpStatus status = HttpStatus.NOT_FOUND;
             NoDataFoundException cnae = (NoDataFoundException) ex;
 
-            return handleInvalidRequestException(cnae, headers, status, request);
+            return handleNoDataFoundException(cnae, headers, status, request);
         } else {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("Unknown exception type: " + ex.getClass().getName());
@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
      * @param status The selected response status
      * @return a {@code ResponseEntity} instance
      */
-    protected ResponseEntity<ApiError> handleUserNotFoundException(InvalidRequestException ex,
+    protected ResponseEntity<ApiError> handleInvalidRequestException(InvalidRequestException ex,
                                                                     HttpHeaders headers, HttpStatus status,
                                                                     WebRequest request) {
         List<String> errors = Collections.singletonList(ex.getMessage());
@@ -79,7 +79,7 @@ public class GlobalExceptionHandler {
      * @param status The selected response status
      * @return a {@code ResponseEntity} instance
      */
-    protected ResponseEntity<ApiError> handleInvalidRequestException(NoDataFoundException ex,
+    protected ResponseEntity<ApiError> handleNoDataFoundException(NoDataFoundException ex,
                                                                              HttpHeaders headers,
                                                                              HttpStatus status,
                                                                              WebRequest request) {
