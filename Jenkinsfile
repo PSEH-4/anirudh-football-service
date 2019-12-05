@@ -115,7 +115,7 @@ pipeline {
 				}
 			}
 		}
-*/		
+		
 
 		// ######
 		// DOCKER
@@ -152,7 +152,7 @@ pipeline {
 				}
 			}
 		}
-
+*/
 		// ##########
 		// DEPLOYMENT
 		// ##########
@@ -169,6 +169,7 @@ pipeline {
 			steps {
 				script {
 					echo "deploying to AWS EC2"
+					scp target/ remote_username@10.10.0.2:/remote/directory
 				}
 			}
 		}
